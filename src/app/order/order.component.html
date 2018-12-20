@@ -1,0 +1,58 @@
+<div>
+  <mat-card [formGroup]="orderForm">
+    <mat-card-title color="primary">Food Order Form</mat-card-title>
+    <mat-card-content>
+      <app-option label="Type">
+        <mat-form-field>
+          <mat-select formControlName="foodType">
+              <mat-option *ngFor="let option of foodTypes;" [value]="option.value">{{option.view}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+      </app-option>
+
+      <!-- Pizza Options -->
+      <div [ngClass]="{hidden: !(isPizza$ | async)}" formGroupName="pizza">
+        <app-option label="Size">
+          <mat-form-field>
+            <mat-select formControlName="size">
+                <mat-option *ngFor="let option of sizes;" [value]="option.value">{{option.view}}</mat-option>
+              </mat-select>
+          </mat-form-field>
+        </app-option>
+        <app-option label="Toppings">
+          <mat-form-field>
+            <mat-select [multiple]="true" formControlName="toppings">
+                <mat-option *ngFor="let option of toppings;" [value]="option.value">{{option.view}}</mat-option>
+              </mat-select>
+          </mat-form-field>
+        </app-option>
+        <app-option label="Quantity of Toppings">
+          <mat-form-field>
+            <mat-select formControlName="toppingsQuantity">
+                <mat-option *ngFor="let option of quantities;" [value]="option.value">{{option.view}}</mat-option>
+              </mat-select>
+          </mat-form-field>
+        </app-option>
+      </div>
+
+      <!-- Chicken Options -->
+      <div [ngClass]="{hidden: !(isChicken$ | async)}" formGroupName="chicken">
+        <app-option label="Sauce">
+          <mat-form-field>
+            <mat-select formControlName="sauce">
+                <mat-option *ngFor="let option of sauces;" [value]="option.value">{{option.view}}</mat-option>
+              </mat-select>
+          </mat-form-field>
+        </app-option>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <button 
+        mat-button 
+        mat-raised-button 
+        color="primary" 
+        (click)="submitOrder($event)"
+        [disabled]="disabled$ | async">Submit Order</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
