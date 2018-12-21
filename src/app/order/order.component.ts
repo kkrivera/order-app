@@ -1,11 +1,23 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 interface Option {
   value: string;
   view: string;
+}
+
+interface OrderForm {
+  foodType: string;
+  pizza: {
+    size: string;
+    toppings: string[];
+    toppingsQuantity: string;
+  };
+  chicken: {
+    sauce: string;
+  };
 }
 
 @Component({
@@ -13,7 +25,7 @@ interface Option {
   templateUrl: './order.component.html',
   styleUrls: ['./order.component.scss']
 })
-export class OrderComponent implements OnInit, OnDestroy {
+export class OrderComponent implements OnInit {
   orderForm: FormGroup;
   foodTypes: Option[] = [
     { value: 'pizza', view: 'Pizza' },
@@ -26,7 +38,7 @@ export class OrderComponent implements OnInit, OnDestroy {
   ];
   toppings: Option[] = [
     { value: 'pepperoni', view: 'Pepperoni' },
-    { value: 'Salami', view: 'Salami' },
+    { value: 'salami', view: 'Salami' },
     { value: 'peppers', view: 'Peppers' },
     { value: 'onions', view: 'Onions' },
     { value: 'olives', view: 'Olives' }
@@ -43,12 +55,25 @@ export class OrderComponent implements OnInit, OnDestroy {
     { value: 'none', view: 'None' }
   ];
 
-  disabled$: Subject<boolean> = new BehaviorSubject<boolean>(true);
   subscription: Subscription = new Subscription();
 
   foodType$: Observable<string>;
   isPizza$: Observable<boolean>;
   isChicken$: Observable<boolean>;
+  cost$: Observable<number>;
+  orderForm$: Observable<OrderForm>;
+
+  sizeCostMap = {
+    small: 5,
+    medium: 10,
+    large: 15
+  };
+
+  quantityCostMap = {
+    normal: 0.5,
+    extra: 1,
+    double: 2
+  };
 
   constructor() {}
 
@@ -65,6 +90,8 @@ export class OrderComponent implements OnInit, OnDestroy {
       })
     });
 
+    this.orderForm$ = this.orderForm.valueChanges;
+
     this.foodType$ = this.orderForm.valueChanges.pipe(
       map(form => form.foodType)
     );
@@ -72,18 +99,30 @@ export class OrderComponent implements OnInit, OnDestroy {
     this.isPizza$ = this.foodType$.pipe(map(type => type === 'pizza'));
     this.isChicken$ = this.foodType$.pipe(map(type => type === 'chicken'));
 
-    this.subscription.add(
-      this.orderForm.valueChanges.subscribe(values => console.log(values))
+    this.cost$ = this.orderForm.valueChanges.pipe(
+      map(form => this.mapFormToCost(form)),
+      startWith(0)
     );
-
-    this.disabled$.next(true);
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
+  private mapFormToCost(form: OrderForm): number {
+    let cost = 0;
+    if (form.foodType === 'pizza') {
+      const size = form.pizza.size;
+      if (!!size) {
+        cost += this.sizeCostMap[size];
+      }
 
-  submitOrder() {
-    console.log(this.orderForm.value);
+      const toppings = form.pizza.toppings;
+      if (!!toppings) {
+        const quantity = form.pizza.toppingsQuantity;
+        const toppingCost = !!quantity ? this.quantityCostMap[quantity] : 0;
+        cost += toppingCost * toppings.length;
+      }
+    } else if (form.foodType === 'chicken') {
+      cost = 6.99;
+    }
+
+    return cost;
   }
 }

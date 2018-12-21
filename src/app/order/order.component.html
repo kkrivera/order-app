@@ -39,20 +39,34 @@
       <div [ngClass]="{hidden: !(isChicken$ | async)}" formGroupName="chicken">
         <app-option label="Sauce">
           <mat-form-field>
-            <mat-select formControlName="sauce">
+            <mat-select value="none" formControlName="sauce">
                 <mat-option *ngFor="let option of sauces;" [value]="option.value">{{option.view}}</mat-option>
               </mat-select>
           </mat-form-field>
         </app-option>
       </div>
     </mat-card-content>
-    <mat-card-actions>
-      <button 
-        mat-button 
-        mat-raised-button 
-        color="primary" 
-        (click)="submitOrder($event)"
-        [disabled]="disabled$ | async">Submit Order</button>
-    </mat-card-actions>
+
+    <mat-card-footer *ngIf="orderForm$ | async as form">
+      <div class="summary" [ngClass]="{hidden: false}">
+          <span>{{ form?.foodType }}</span>
+          <div *ngIf="isPizza$ | async">
+            <div class="display" *ngIf="form?.pizza?.size">
+              <label>Size:</label><span>{{ form?.pizza?.size }}</span>
+            </div>
+            <div class="display" *ngIf="form?.pizza?.toppings?.length > 0">
+              <label>Toppings:</label><span>{{ form?.pizza?.toppings }}</span>
+            </div>
+            <div class="display" *ngIf="form?.pizza?.toppingsQuantity">
+              <label>Quantity:</label><span>{{ form?.pizza?.toppingsQuantity }}</span>
+            </div>
+          </div>
+          <div *ngIf="isChicken$ | async">
+            <div class="display" *ngIf="form?.chicken?.sauce"><label>Sauce:</label><span>{{ form?.chicken?.sauce }}</span></div>
+          </div>
+          <div>Cost: ${{ cost$ | async }}</div>
+      </div>
+    </mat-card-footer>
   </mat-card>
+  
 </div>
