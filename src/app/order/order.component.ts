@@ -1,24 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
-import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-
-interface Option {
-  value: string;
-  view: string;
-}
-
-interface OrderForm {
-  foodType: string;
-  pizza: {
-    size: string;
-    toppings: string[];
-    toppingsQuantity: string;
-  };
-  chicken: {
-    sauce: string;
-  };
-}
+import { Option, OrderForm } from './order.model';
 
 @Component({
   selector: 'app-order',
